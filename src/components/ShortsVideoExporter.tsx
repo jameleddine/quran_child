@@ -77,6 +77,9 @@ export const ShortsVideoExporter: React.FC<ShortsVideoExporterProps> = ({
         await audioContext.resume();
       }
 
+      // Allow 150ms for t=0 initial frame and burnt captions to settle cleanly on canvas
+      await new Promise((resolve) => setTimeout(resolve, 150));
+
       // Get canvas stream (30 FPS)
       const canvasStream = canvas.captureStream(30);
 

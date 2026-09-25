@@ -33,6 +33,37 @@ export const BoyAvatarCanvas: React.FC<BoyAvatarCanvasProps> = ({
   const userImageRef = useRef<HTMLImageElement | null>(null);
   const animFrameRef = useRef<number | null>(null);
 
+  // Store mutable props in a ref to avoid resetting the canvas animation loop on every audio/time tick
+  const propsRef = useRef({
+    isPlaying,
+    audioEnergy,
+    customImageSrc,
+    showParticles,
+    showLightRays,
+    theme,
+    burnCaptionsOnCanvas,
+    currentSegment,
+    currentTime,
+    photoMotion,
+    photoColorGrade,
+  });
+
+  useEffect(() => {
+    propsRef.current = {
+      isPlaying,
+      audioEnergy,
+      customImageSrc,
+      showParticles,
+      showLightRays,
+      theme,
+      burnCaptionsOnCanvas,
+      currentSegment,
+      currentTime,
+      photoMotion,
+      photoColorGrade,
+    };
+  });
+
   // Load custom image when provided
   useEffect(() => {
     if (customImageSrc) {
@@ -42,6 +73,9 @@ export const BoyAvatarCanvas: React.FC<BoyAvatarCanvasProps> = ({
         userImageRef.current = img;
       };
       img.src = customImageSrc;
+      if (img.complete) {
+        userImageRef.current = img;
+      }
     } else {
       userImageRef.current = null;
     }
@@ -50,16 +84,18 @@ export const BoyAvatarCanvas: React.FC<BoyAvatarCanvasProps> = ({
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    if (onCanvasReady) onCanvasReady(canvas);
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
 
     // Fixed canvas internal resolution for crisp 9:16 Shorts rendering (720x1280)
     const W = 720;
     const H = 1280;
-    canvas.width = W;
-    canvas.height = H;
+    if (canvas.width !== W) canvas.width = W;
+    if (canvas.height !== H) canvas.height = H;
+
+    if (onCanvasReady) onCanvasReady(canvas);
+
+    // Using alpha: false guarantees the canvas buffer is never cleared to transparent black
+    const ctx = canvas.getContext('2d', { alpha: false });
+    if (!ctx) return;
 
     // Particle setup
     const particles = Array.from({ length: 45 }, () => ({
@@ -90,6 +126,19 @@ export const BoyAvatarCanvas: React.FC<BoyAvatarCanvasProps> = ({
     let mouthOpening = 0;
 
     const render = (time: number) => {
+      const {
+        isPlaying: activePlaying,
+        audioEnergy: activeEnergy,
+        showParticles: activeParticles,
+        showLightRays: activeLightRays,
+        theme: activeTheme,
+        burnCaptionsOnCanvas: activeBurn,
+        currentSegment: activeSegment,
+        currentTime: activeTime,
+        photoMotion: activePhotoMotion,
+        photoColorGrade: activeColorGrade,
+      } = propsRef.current;
+
       const elapsed = (time - startTime) / 1000;
 
       // Handle Blinking
@@ -102,17 +151,15 @@ export const BoyAvatarCanvas: React.FC<BoyAvatarCanvasProps> = ({
       }
 
       // Smooth mouth interpolation
-      const targetMouth = isPlaying ? Math.min(1, Math.max(0, audioEnergy * 1.5)) : 0;
+      const targetMouth = activePlaying ? Math.min(1, Math.max(0, activeEnergy * 1.5)) : 0;
       mouthOpening += (targetMouth - mouthOpening) * 0.25;
 
       // Subtle breathing motion
       const breath = Math.sin(elapsed * 1.5) * 3;
       const headSway = Math.sin(elapsed * 0.8) * 1.5;
 
-      // Clear Canvas
-      ctx.clearRect(0, 0, W, H);
-
-      // If user uploaded an image, draw pristine real photo without any mouth/eye animation distortion
+      // DO NOT call clearRect - background is drawn completely opaque over the frame
+      // This prevents black strobe flickering during screen recording / MediaRecorder capture
       if (userImageRef.current && userImageRef.current.complete) {
         drawPristineUserPhoto(
           ctx,
@@ -120,8 +167,8 @@ export const BoyAvatarCanvas: React.FC<BoyAvatarCanvasProps> = ({
           W,
           H,
           elapsed,
-          photoMotion,
-          photoColorGrade
+          activePhotoMotion,
+          activeColorGrade
         );
       } else {
         // Draw the authentic 6-year-old Tunisian boy in red chechia & cream jebba
@@ -134,17 +181,17 @@ export const BoyAvatarCanvas: React.FC<BoyAvatarCanvasProps> = ({
           blinkValue,
           breath,
           headSway,
-          theme
+          activeTheme
         );
       }
 
       // Draw Divine Light Rays
-      if (showLightRays) {
+      if (activeLightRays) {
         drawCelestialLightRays(ctx, W, H, elapsed);
       }
 
       // Draw Ambient Particles (Noor & Bougainvillea petals)
-      if (showParticles) {
+      if (activeParticles) {
         drawAmbientEffects(ctx, particles, petals, W, H, elapsed);
       }
 
@@ -152,8 +199,8 @@ export const BoyAvatarCanvas: React.FC<BoyAvatarCanvasProps> = ({
       drawCinematicVignette(ctx, W, H);
 
       // Burn Captions on Canvas (for direct recording / video export)
-      if (burnCaptionsOnCanvas && currentSegment) {
-        drawCanvasCaptions(ctx, W, H, currentSegment, currentTime);
+      if (activeBurn && activeSegment) {
+        drawCanvasCaptions(ctx, W, H, activeSegment, activeTime);
       }
 
       animFrameRef.current = requestAnimationFrame(render);
@@ -166,7 +213,7 @@ export const BoyAvatarCanvas: React.FC<BoyAvatarCanvasProps> = ({
         cancelAnimationFrame(animFrameRef.current);
       }
     };
-  }, [isPlaying, audioEnergy, customImageSrc, showParticles, showLightRays, theme]);
+  }, []); // Run once on mount! Never restart or re-dimension canvas during playback/recording
 
   return (
     <div className="relative w-full h-full flex items-center justify-center overflow-hidden bg-slate-950">
