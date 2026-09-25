@@ -1,0 +1,8 @@
+{
+  "name": "Quran Shorts - Child Recitation Video Studio",
+  "description": "Create engaging 9:16 vertical shorts, reels, and TikTok videos of Ayat al-Kursi recitation with a 6-year-old child voice, synchronized Arabic calligraphy captions, animated mouth lip-sync, and video export.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

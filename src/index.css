@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+@theme {
+  --font-arabic: 'Amiri', 'Scheherazade New', 'Noto Naskh Arabic', serif;
+  --font-quran: 'Amiri Quran', 'Amiri', serif;
+  --font-sans: 'Outfit', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+@layer utilities {
+  .font-quran {
+    font-family: var(--font-quran);
+  }
+  .font-arabic {
+    font-family: var(--font-arabic);
+  }
+  .text-glow-gold {
+    text-shadow: 0 0 16px rgba(251, 191, 36, 0.75), 0 0 32px rgba(245, 158, 11, 0.45);
+  }
+  .text-glow-white {
+    text-shadow: 0 0 12px rgba(255, 255, 255, 0.8), 0 0 24px rgba(255, 255, 255, 0.4);
+  }
+  .box-glow-gold {
+    box-shadow: 0 0 30px rgba(245, 158, 11, 0.25), inset 0 0 20px rgba(251, 191, 36, 0.15);
+  }
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.6);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(245, 158, 11, 0.3);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(245, 158, 11, 0.6);
+}
