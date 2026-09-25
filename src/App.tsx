@@ -135,14 +135,14 @@ export default function App() {
     setSegments(newSegs);
     setCurrentAyahTitle(title);
     setCurrentCollectionId('custom');
-    if (synthesizedAudioUrl) {
-      loadAudioSource(synthesizedAudioUrl, newSegs[newSegs.length - 1].endTime);
-    }
+    const audioToUse = synthesizedAudioUrl || audioSource || '/audio/ayat_alkursi_child.wav';
+    const totalDuration = newSegs[newSegs.length - 1]?.endTime || 30;
+    loadAudioSource(audioToUse, totalDuration);
     seek(0);
   };
 
   // Handler for choosing a preset collection
-  const handleSelectCollection = async (collectionId: string) => {
+  const handleSelectCollection = (collectionId: string) => {
     const found = PRESET_QURAN_COLLECTIONS.find((c) => c.id === collectionId);
     if (!found) return;
 
@@ -151,38 +151,9 @@ export default function App() {
     setCurrentCollectionId(collectionId);
     seek(0);
 
-    if (found.audioUrl) {
-      loadAudioSource(found.audioUrl, found.segments[found.segments.length - 1].endTime);
-    } else {
-      // Synthesize child voice for the preset on-the-fly
-      try {
-        const fullArabic = found.segments.map((s) => s.arabic).join(' ۚ ');
-        const ttsRes = await fetch('/api/tts/generate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            text: fullArabic,
-            voiceName: 'Puck',
-            childAge: 6,
-            style: 'A sweet 6-year-old child reciting the Holy Quran with high-pitched youthful voice and clear peaceful tajweed',
-          }),
-        });
-        const ttsData = await ttsRes.json();
-        if (ttsData.success && ttsData.audioBase64) {
-          const byteCharacters = atob(ttsData.audioBase64);
-          const byteNumbers = new Array(byteCharacters.length);
-          for (let i = 0; i < byteCharacters.length; i++) {
-            byteNumbers[i] = byteCharacters.charCodeAt(i);
-          }
-          const byteArray = new Uint8Array(byteNumbers);
-          const blob = new Blob([byteArray], { type: ttsData.mimeType || 'audio/wav' });
-          const audioUrl = URL.createObjectURL(blob);
-          loadAudioSource(audioUrl, found.segments[found.segments.length - 1].endTime);
-        }
-      } catch (err) {
-        console.warn('Preset synthesis fallback:', err);
-      }
-    }
+    const targetAudio = found.audioUrl || '/audio/ayat_alkursi_child.wav';
+    const totalDuration = found.segments[found.segments.length - 1]?.endTime || 53.84;
+    loadAudioSource(targetAudio, totalDuration);
   };
 
   return (
@@ -192,7 +163,6 @@ export default function App() {
         ref={audioElementRef}
         src={audioSource}
         preload="auto"
-        crossOrigin="anonymous"
       />
 
       {/* Top Navbar */}

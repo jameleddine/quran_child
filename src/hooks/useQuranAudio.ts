@@ -29,7 +29,7 @@ export function useQuranAudio(
 ): UseQuranAudioReturn {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(53.96);
+  const [duration, setDuration] = useState(53.84);
   const [audioEnergy, setAudioEnergy] = useState(0);
   const [audioSource, setAudioSource] = useState(initialAudioUrl);
   const [playbackRate, setPlaybackRate] = useState(1.0);
@@ -41,37 +41,41 @@ export function useQuranAudio(
   const sourceNodeRef = useRef<MediaElementAudioSourceNode | null>(null);
   const mediaStreamDestinationRef = useRef<MediaStreamAudioDestinationNode | null>(null);
   const animFrameRef = useRef<number | null>(null);
+  const pendingSeekRef = useRef<number | null>(null);
 
   // Initialize Web Audio graph
   const initAudioGraph = useCallback(() => {
     if (!audioElementRef.current) return;
-    if (!audioContextRef.current) {
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-      const ctx = new AudioCtx();
-      audioContextRef.current = ctx;
+    try {
+      if (!audioContextRef.current) {
+        const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+        const ctx = new AudioCtx();
+        audioContextRef.current = ctx;
 
-      const analyser = ctx.createAnalyser();
-      analyser.fftSize = 256;
-      analyser.smoothingTimeConstant = 0.8;
-      analyserRef.current = analyser;
+        const analyser = ctx.createAnalyser();
+        analyser.fftSize = 256;
+        analyser.smoothingTimeConstant = 0.8;
+        analyserRef.current = analyser;
 
-      const streamDest = ctx.createMediaStreamDestination();
-      mediaStreamDestinationRef.current = streamDest;
+        const streamDest = ctx.createMediaStreamDestination();
+        mediaStreamDestinationRef.current = streamDest;
 
-      try {
-        const source = ctx.createMediaElementSource(audioElementRef.current);
-        sourceNodeRef.current = source;
-        source.connect(analyser);
-        analyser.connect(ctx.destination);
-        // Connect also to stream destination for video recording
-        analyser.connect(streamDest);
-      } catch (err) {
-        console.warn('Audio node connection warning (can happen on re-mount):', err);
+        try {
+          const source = ctx.createMediaElementSource(audioElementRef.current);
+          sourceNodeRef.current = source;
+          source.connect(analyser);
+          analyser.connect(ctx.destination);
+          analyser.connect(streamDest);
+        } catch (err) {
+          console.warn('Audio node connection notice:', err);
+        }
       }
-    }
 
-    if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
-      audioContextRef.current.resume();
+      if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
+        audioContextRef.current.resume().catch(() => {});
+      }
+    } catch (err) {
+      console.warn('AudioContext init non-fatal:', err);
     }
   }, []);
 
@@ -84,14 +88,13 @@ export function useQuranAudio(
         const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
         analyserRef.current.getByteFrequencyData(dataArray);
 
-        // Calculate average energy in speech voice band (approx bins 2 to 30)
+        // Calculate average energy in speech voice band (approx bins 2 to 32)
         let sum = 0;
         const count = Math.min(dataArray.length, 32);
         for (let i = 2; i < count; i++) {
           sum += dataArray[i];
         }
         const avg = sum / (count - 2);
-        // Normalize 0 to 1
         const normalized = Math.min(1, Math.max(0, avg / 140));
         setAudioEnergy(normalized);
       } else if (!isPlaying) {
@@ -109,16 +112,43 @@ export function useQuranAudio(
 
   // Handle Play
   const play = useCallback(async () => {
+    const audio = audioElementRef.current;
+    if (!audio) return;
+
+    // Ensure audio element has a valid src
+    const currentSrc = audio.getAttribute('src') || audio.src;
+    if (!currentSrc || currentSrc === window.location.href || currentSrc.endsWith('/')) {
+      const fallbackSrc = audioSource || '/audio/ayat_alkursi_child.wav';
+      audio.src = fallbackSrc;
+      audio.load();
+    }
+
     initAudioGraph();
-    if (audioElementRef.current) {
-      try {
-        await audioElementRef.current.play();
-        setIsPlaying(true);
-      } catch (err) {
-        console.error('Audio play error:', err);
+
+    try {
+      if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
+        await audioContextRef.current.resume();
+      }
+      await audio.play();
+      setIsPlaying(true);
+    } catch (err: any) {
+      console.warn('Audio play attempt notice:', err?.message || err);
+      // Auto-fallback if source is invalid or unsupported
+      if (err?.name === 'NotSupportedError' || audio.error) {
+        try {
+          audio.src = '/audio/ayat_alkursi_child.wav';
+          audio.load();
+          await audio.play();
+          setIsPlaying(true);
+        } catch (retryErr) {
+          console.error('Audio playback fallback notice:', retryErr);
+          setIsPlaying(false);
+        }
+      } else {
+        setIsPlaying(false);
       }
     }
-  }, [initAudioGraph]);
+  }, [audioSource, initAudioGraph]);
 
   // Handle Pause
   const pause = useCallback(() => {
@@ -137,12 +167,21 @@ export function useQuranAudio(
     }
   }, [isPlaying, play, pause]);
 
-  // Seek
+  // Safe Seek
   const seek = useCallback((seconds: number) => {
+    const clamped = Math.max(0, Math.min(seconds, duration || 60));
+    setCurrentTime(clamped);
+
     if (audioElementRef.current) {
-      const clamped = Math.max(0, Math.min(seconds, duration));
-      audioElementRef.current.currentTime = clamped;
-      setCurrentTime(clamped);
+      try {
+        if (audioElementRef.current.readyState >= 1) {
+          audioElementRef.current.currentTime = clamped;
+        } else {
+          pendingSeekRef.current = clamped;
+        }
+      } catch (e) {
+        console.warn('Safe seek intercepted:', e);
+      }
     }
   }, [duration]);
 
@@ -154,16 +193,22 @@ export function useQuranAudio(
     }
   }, []);
 
-  // Load new audio source
+  // Load new audio source safely
   const loadAudioSource = useCallback((source: string, newDuration?: number) => {
     pause();
-    setAudioSource(source);
+    const validSource = (source && typeof source === 'string' && source.trim().length > 0)
+      ? source.trim()
+      : '/audio/ayat_alkursi_child.wav';
+
+    setAudioSource(validSource);
     setCurrentTime(0);
+
     if (newDuration && newDuration > 0) {
       setDuration(newDuration);
     }
+
     if (audioElementRef.current) {
-      audioElementRef.current.src = source;
+      audioElementRef.current.src = validSource;
       audioElementRef.current.load();
     }
   }, [pause]);
@@ -181,6 +226,10 @@ export function useQuranAudio(
       if (audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)) {
         setDuration(audio.duration);
       }
+      if (pendingSeekRef.current !== null) {
+        audio.currentTime = pendingSeekRef.current;
+        pendingSeekRef.current = null;
+      }
     };
 
     const onEnded = () => {
@@ -188,14 +237,25 @@ export function useQuranAudio(
       setCurrentTime(0);
     };
 
+    const onError = () => {
+      console.warn('Audio element error detected on src:', audio.src);
+      // Auto-recover to default child audio if an external CDN failed
+      if (audio.src && !audio.src.includes('ayat_alkursi_child.wav')) {
+        audio.src = '/audio/ayat_alkursi_child.wav';
+        audio.load();
+      }
+    };
+
     audio.addEventListener('timeupdate', onTimeUpdate);
     audio.addEventListener('loadedmetadata', onLoadedMetadata);
     audio.addEventListener('ended', onEnded);
+    audio.addEventListener('error', onError);
 
     return () => {
       audio.removeEventListener('timeupdate', onTimeUpdate);
       audio.removeEventListener('loadedmetadata', onLoadedMetadata);
       audio.removeEventListener('ended', onEnded);
+      audio.removeEventListener('error', onError);
     };
   }, []);
 

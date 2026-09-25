@@ -180,6 +180,7 @@ export const PRESET_QURAN_COLLECTIONS: QuranCollection[] = [
     id: 'surah_ikhlas',
     title: 'Surah Al-Ikhlas (Purity of Faith)',
     arabicTitle: 'سورة الإخلاص • ١١٢',
+    audioUrl: '/audio/surah_ikhlas.mp3',
     description: 'Equivalent to one-third of the Holy Quran in reward',
     segments: [
       {
@@ -189,7 +190,7 @@ export const PRESET_QURAN_COLLECTIONS: QuranCollection[] = [
         transliteration: "Bismillāhir-Raḥmānir-Raḥīm",
         translation: "In the name of Allah, the Entirely Merciful, the Especially Merciful.",
         startTime: 0.0,
-        endTime: 3.5,
+        endTime: 4.2,
         words: [
           { ar: "بِسْمِ", tr: "In the name of" },
           { ar: "اللَّهِ", tr: "Allah" },
@@ -203,8 +204,8 @@ export const PRESET_QURAN_COLLECTIONS: QuranCollection[] = [
         arabic: "قُلْ هُوَ اللَّهُ أَحَدٌ",
         transliteration: "Qul huwa Allāhu aḥad",
         translation: "Say: He is Allah, [who is] One,",
-        startTime: 3.5,
-        endTime: 7.2,
+        startTime: 4.2,
+        endTime: 8.5,
         words: [
           { ar: "قُلْ", tr: "Say" },
           { ar: "هُوَ", tr: "He is" },
@@ -218,8 +219,8 @@ export const PRESET_QURAN_COLLECTIONS: QuranCollection[] = [
         arabic: "اللَّهُ الصَّمَدُ",
         transliteration: "Allāhuṣ-Ṣamad",
         translation: "Allah, the Eternal Refuge.",
-        startTime: 7.2,
-        endTime: 10.8,
+        startTime: 8.5,
+        endTime: 12.5,
         words: [
           { ar: "اللَّهُ", tr: "Allah" },
           { ar: "الصَّمَدُ", tr: "the Eternal Refuge" }
@@ -231,8 +232,8 @@ export const PRESET_QURAN_COLLECTIONS: QuranCollection[] = [
         arabic: "لَمْ يَلِدْ وَلَمْ يُولَدْ",
         transliteration: "Lam yalid walam yūlad",
         translation: "He neither begets nor is born,",
-        startTime: 10.8,
-        endTime: 14.8,
+        startTime: 12.5,
+        endTime: 16.8,
         words: [
           { ar: "لَمْ يَلِدْ", tr: "He neither begets" },
           { ar: "وَلَمْ", tr: "nor" },
@@ -245,8 +246,8 @@ export const PRESET_QURAN_COLLECTIONS: QuranCollection[] = [
         arabic: "وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ",
         transliteration: "Walam yakul-lahū kufuwan aḥad",
         translation: "Nor is there to Him any equivalent.",
-        startTime: 14.8,
-        endTime: 19.5,
+        startTime: 16.8,
+        endTime: 21.7,
         words: [
           { ar: "وَلَمْ يَكُن", tr: "Nor is there" },
           { ar: "لَّهُ", tr: "to Him" },
@@ -260,6 +261,7 @@ export const PRESET_QURAN_COLLECTIONS: QuranCollection[] = [
     id: 'surah_fatiha',
     title: 'Surah Al-Fatiha (The Opening)',
     arabicTitle: 'سورة الفاتحة • ١',
+    audioUrl: '/audio/surah_fatiha.mp3',
     description: 'The seven oft-repeated verses recited in every prayer',
     segments: [
       {
@@ -269,7 +271,7 @@ export const PRESET_QURAN_COLLECTIONS: QuranCollection[] = [
         transliteration: "Bismillāhir-Raḥmānir-Raḥīm",
         translation: "In the name of Allah, the Entirely Merciful, the Especially Merciful.",
         startTime: 0.0,
-        endTime: 4.2,
+        endTime: 5.5,
         words: [{ ar: "بِسْمِ", tr: "In name of" }, { ar: "اللَّهِ", tr: "Allah" }, { ar: "الرَّحْمَٰنِ", tr: "Gracious" }, { ar: "الرَّحِيمِ", tr: "Merciful" }]
       },
       {
@@ -278,8 +280,8 @@ export const PRESET_QURAN_COLLECTIONS: QuranCollection[] = [
         arabic: "الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ",
         transliteration: "Al-ḥamdu lillāhi rabbil-‘ālamīn",
         translation: "All praise is due to Allah, Lord of the worlds.",
-        startTime: 4.2,
-        endTime: 9.0,
+        startTime: 5.5,
+        endTime: 12.0,
         words: [{ ar: "الْحَمْدُ", tr: "All praise" }, { ar: "لِلَّهِ", tr: "is for Allah" }, { ar: "رَبِّ", tr: "Lord of" }, { ar: "الْعَالَمِينَ", tr: "the worlds" }]
       },
       {
@@ -288,8 +290,8 @@ export const PRESET_QURAN_COLLECTIONS: QuranCollection[] = [
         arabic: "الرَّحْمَٰنِ الرَّحِيمِ",
         transliteration: "Ar-Raḥmānir-Raḥīm",
         translation: "The Entirely Merciful, the Especially Merciful.",
-        startTime: 9.0,
-        endTime: 13.5,
+        startTime: 12.0,
+        endTime: 17.5,
         words: [{ ar: "الرَّحْمَٰنِ", tr: "The Entirely Merciful" }, { ar: "الرَّحِيمِ", tr: "the Especially Merciful" }]
       },
       {
@@ -298,8 +300,8 @@ export const PRESET_QURAN_COLLECTIONS: QuranCollection[] = [
         arabic: "مَالِكِ يَوْمِ الدِّينِ",
         transliteration: "Māliki yawmid-dīn",
         translation: "Sovereign of the Day of Recompense.",
-        startTime: 13.5,
-        endTime: 17.8,
+        startTime: 17.5,
+        endTime: 23.5,
         words: [{ ar: "مَالِكِ", tr: "Master of" }, { ar: "يَوْمِ", tr: "the Day of" }, { ar: "الدِّينِ", tr: "Judgment" }]
       },
       {
@@ -308,8 +310,8 @@ export const PRESET_QURAN_COLLECTIONS: QuranCollection[] = [
         arabic: "إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ",
         transliteration: "Iyyāka na‘budu wa-iyyāka nasta‘īn",
         translation: "It is You we worship and You we ask for help.",
-        startTime: 17.8,
-        endTime: 23.0,
+        startTime: 23.5,
+        endTime: 30.5,
         words: [{ ar: "إِيَّاكَ", tr: "You alone" }, { ar: "نَعْبُدُ", tr: "we worship" }, { ar: "وَإِيَّاكَ", tr: "and You alone" }, { ar: "نَسْتَعِينُ", tr: "we ask for help" }]
       },
       {
@@ -318,8 +320,8 @@ export const PRESET_QURAN_COLLECTIONS: QuranCollection[] = [
         arabic: "اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ",
         transliteration: "Ihdinaṣ-ṣirāṭal-mustaqīm",
         translation: "Guide us to the straight path.",
-        startTime: 23.0,
-        endTime: 28.0,
+        startTime: 30.5,
+        endTime: 38.0,
         words: [{ ar: "اهْدِنَا", tr: "Guide us" }, { ar: "الصِّرَاطَ", tr: "to the path" }, { ar: "الْمُسْتَقِيمَ", tr: "the straight" }]
       },
       {
@@ -328,8 +330,8 @@ export const PRESET_QURAN_COLLECTIONS: QuranCollection[] = [
         arabic: "صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ",
         transliteration: "Ṣirāṭal-ladhīna an‘amta ‘alayhim ghayril-maghḍūbi ‘alayhim walāḍ-ḍāllīn",
         translation: "The path of those upon whom You have bestowed favor, not of those who have evoked anger or of those who are astray.",
-        startTime: 28.0,
-        endTime: 36.5,
+        startTime: 38.0,
+        endTime: 51.9,
         words: [{ ar: "صِرَاطَ الَّذِينَ", tr: "The path of those" }, { ar: "أَنْعَمْتَ عَلَيْهِمْ", tr: "You favored" }, { ar: "غَيْرِ الْمَغْضُوبِ", tr: "not of anger" }, { ar: "وَلَا الضَّالِّينَ", tr: "nor the astray" }]
       }
     ]
@@ -338,6 +340,7 @@ export const PRESET_QURAN_COLLECTIONS: QuranCollection[] = [
     id: 'surah_kawthar',
     title: 'Surah Al-Kawthar (Abundance)',
     arabicTitle: 'سورة الكوثر • ١٠٨',
+    audioUrl: '/audio/surah_kawthar.mp3',
     description: 'The shortest and most comforting Surah in the Holy Quran',
     segments: [
       {
@@ -347,7 +350,7 @@ export const PRESET_QURAN_COLLECTIONS: QuranCollection[] = [
         transliteration: "Innā a‘ṭaynākal-kawthar",
         translation: "Indeed, We have granted you abundance.",
         startTime: 0.0,
-        endTime: 4.8,
+        endTime: 7.5,
         words: [{ ar: "إِنَّا", tr: "Indeed, We" }, { ar: "أَعْطَيْنَاكَ", tr: "have granted you" }, { ar: "الْكَوْثَرَ", tr: "the abundance" }]
       },
       {
@@ -356,8 +359,8 @@ export const PRESET_QURAN_COLLECTIONS: QuranCollection[] = [
         arabic: "فَصَلِّ لِرَبِّكَ وَانْحَرْ",
         transliteration: "Faṣalli lirabbika wanḥar",
         translation: "So pray to your Lord and sacrifice.",
-        startTime: 4.8,
-        endTime: 9.6,
+        startTime: 7.5,
+        endTime: 15.5,
         words: [{ ar: "فَصَلِّ", tr: "So pray" }, { ar: "لِرَبِّكَ", tr: "to your Lord" }, { ar: "وَانْحَرْ", tr: "and sacrifice" }]
       },
       {
@@ -366,8 +369,8 @@ export const PRESET_QURAN_COLLECTIONS: QuranCollection[] = [
         arabic: "إِنَّ شَانِئَكَ هُوَ الْأَبْتَرُ",
         transliteration: "Inna shāni'aka huwal-abtar",
         translation: "Indeed, your enemy is the one cut off.",
-        startTime: 9.6,
-        endTime: 15.0,
+        startTime: 15.5,
+        endTime: 24.5,
         words: [{ ar: "إِنَّ شَانِئَكَ", tr: "Indeed your enemy" }, { ar: "هُوَ", tr: "is" }, { ar: "الْأَبْتَرُ", tr: "the one cut off" }]
       }
     ]
