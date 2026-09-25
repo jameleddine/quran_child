@@ -39,9 +39,16 @@ export const AudioVoiceSelector: React.FC<AudioVoiceSelectorProps> = ({
         }),
       });
 
-      const data = await response.json();
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || 'Failed to generate voice');
+      let data: any = null;
+      if (response.ok) {
+        const ct = response.headers.get('content-type') || '';
+        if (ct.includes('application/json')) {
+          data = await response.json();
+        }
+      }
+
+      if (!response.ok || !data || !data.success) {
+        throw new Error(data?.error || 'Gemini TTS synthesis is currently unavailable. Using default sweet child recitation.');
       }
 
       // Convert base64 audio to object URL

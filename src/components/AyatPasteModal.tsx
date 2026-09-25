@@ -59,17 +59,28 @@ export const AyatPasteModal: React.FC<AyatPasteModalProps> = ({
     setStatusMessage('Analyzing Arabic text & generating translations...');
 
     try {
-      const res = await fetch('/api/quran/parse-ayah', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          text: pastedText,
-          customTitle: customTitle || 'Custom Quranic Ayah',
-        }),
-      });
+      let json: any = null;
+      try {
+        const res = await fetch('/api/quran/parse-ayah', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            text: pastedText,
+            customTitle: customTitle || 'Custom Quranic Ayah',
+          }),
+        });
 
-      const json = await res.json();
-      if (json.success && json.data?.segments && json.data.segments.length > 0) {
+        if (res.ok) {
+          const contentType = res.headers.get('content-type') || '';
+          if (contentType.includes('application/json')) {
+            json = await res.json();
+          }
+        }
+      } catch (networkErr) {
+        console.warn('API endpoint unreachable, using client parser:', networkErr);
+      }
+
+      if (json && json.success && json.data?.segments && json.data.segments.length > 0) {
         // Calculate balanced timeline for the segments
         const rawSegs = json.data.segments;
         const totalDuration = Math.max(15, rawSegs.length * 6.5);
@@ -99,7 +110,7 @@ export const AyatPasteModal: React.FC<AyatPasteModalProps> = ({
         setStatusMessage('Parsed into verses using local timing engine.');
       }
     } catch (err: any) {
-      console.warn('AI parse error:', err);
+      console.warn('AI parse notice:', err);
       const fallback = parsePastedAyatText(pastedText, customTitle || 'Custom Ayat');
       setParsedPreview(fallback);
       setStatusMessage('Parsed into verses using local timing engine.');
@@ -122,20 +133,31 @@ export const AyatPasteModal: React.FC<AyatPasteModalProps> = ({
       setIsSynthesizingTTS(true);
       setStatusMessage('Synthesizing 6-year-old child voice recitation for your pasted Ayat...');
       try {
-        const fullArabic = finalSegments.map((s) => s.arabic).join(' ۚ ');
-        const ttsRes = await fetch('/api/tts/generate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            text: fullArabic,
-            voiceName: 'Puck',
-            childAge: 6,
-            style: 'A sweet 6-year-old child reciting the Holy Quran with high-pitched youthful voice and clear peaceful tajweed',
-          }),
-        });
+        let ttsData: any = null;
+        try {
+          const fullArabic = finalSegments.map((s) => s.arabic).join(' ۚ ');
+          const ttsRes = await fetch('/api/tts/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              text: fullArabic,
+              voiceName: 'Puck',
+              childAge: 6,
+              style: 'A sweet 6-year-old child reciting the Holy Quran with high-pitched youthful voice and clear peaceful tajweed',
+            }),
+          });
 
-        const ttsData = await ttsRes.json();
-        if (ttsData.success && ttsData.audioBase64) {
+          if (ttsRes.ok) {
+            const contentType = ttsRes.headers.get('content-type') || '';
+            if (contentType.includes('application/json')) {
+              ttsData = await ttsRes.json();
+            }
+          }
+        } catch (fetchErr) {
+          console.warn('TTS request notice:', fetchErr);
+        }
+
+        if (ttsData && ttsData.success && ttsData.audioBase64) {
           const byteCharacters = atob(ttsData.audioBase64);
           const byteNumbers = new Array(byteCharacters.length);
           for (let i = 0; i < byteCharacters.length; i++) {
@@ -150,7 +172,7 @@ export const AyatPasteModal: React.FC<AyatPasteModalProps> = ({
           return;
         }
       } catch (err) {
-        console.error('TTS error on pasted text:', err);
+        console.warn('TTS fallback notice on pasted text:', err);
       } finally {
         setIsSynthesizingTTS(false);
       }
